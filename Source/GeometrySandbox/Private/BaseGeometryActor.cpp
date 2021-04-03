@@ -12,6 +12,8 @@ ABaseGeometryActor::ABaseGeometryActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("BaseMesh");
+	SetRootComponent(BaseMesh);
 }
 
 // Called when the game starts or when spawned
@@ -19,9 +21,12 @@ void ABaseGeometryActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitialLocation = GetActorLocation();
+
+	// printTypes();
 	// printStringTypes();
 
-	printTypes();
+	printTransform();
 }
 
 // Called every frame
@@ -29,11 +34,15 @@ void ABaseGeometryActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FVector CurrentLocation = GetActorLocation();
+	CurrentLocation.Z = InitialLocation.Z + Amplitude * FMath::Sin(Frequency * GetWorld()->GetTimeSeconds());
+	SetActorLocation(CurrentLocation);
+	UE_LOG(LogBaseGeometry, Display, TEXT("%f"), FMath::Sin(Frequency * GetWorld()->GetTimeSeconds()));
 }
 
 void ABaseGeometryActor::printTypes()
 {
-	UE_LOG(LogBaseGeometry, Warning, TEXT("Actor name %s"), *GetName())
+	UE_LOG(LogBaseGeometry, Warning, TEXT("Actor name %s"), *GetName());
 	UE_LOG(LogBaseGeometry, Warning, TEXT("WeaponsNum: %d, KillsNum: %i"), WeaponsNum, KillsNum);
 	UE_LOG(LogBaseGeometry, Warning, TEXT("Health: %f"), Health);
 	UE_LOG(LogBaseGeometry, Warning, TEXT("IsDead: %d"), IsDead);
@@ -54,4 +63,18 @@ void ABaseGeometryActor::printStringTypes()
 
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, Name);
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, Stat, true, FVector2D(1.5f, 1.5f));
+}
+
+void ABaseGeometryActor::printTransform()
+{
+	FTransform Transform = GetActorTransform();
+	FVector Location = Transform.GetLocation();
+	FRotator Rotation = Transform.Rotator();
+	FVector Scale = Transform.GetScale3D();
+
+	UE_LOG(LogBaseGeometry, Warning, TEXT("Actor name %s"), *GetName());
+	UE_LOG(LogBaseGeometry, Warning, TEXT("Transform %s"), *Transform.ToHumanReadableString());
+	UE_LOG(LogBaseGeometry, Warning, TEXT("Location %s"), *Location.ToString());
+	UE_LOG(LogBaseGeometry, Warning, TEXT("Rotation %s"), *Rotation.ToString());
+	UE_LOG(LogBaseGeometry, Warning, TEXT("Scale %s"), *Scale.ToString());
 }
