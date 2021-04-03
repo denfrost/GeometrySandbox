@@ -3,6 +3,7 @@
 
 #include "BaseGeometryActor.h"
 #include "Engine/Engine.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseGeometry, All, All)
 
@@ -26,6 +27,8 @@ void ABaseGeometryActor::BeginPlay()
 	// PrintTypes();
 	// PrintStringTypes();
 	// PrintTransform();
+
+	SetColor();
 }
 
 // Called every frame
@@ -78,15 +81,24 @@ void ABaseGeometryActor::PrintTransform()
 void ABaseGeometryActor::HandleMovement()
 {
 	switch (GeometryData.MoveType)
+	{
+		case EMovementType::Sin:
 		{
-			case EMovementType::Sin:
-			{
-				FVector CurrentLocation = GetActorLocation();
-				float time = GetWorld()->GetTimeSeconds();
-				CurrentLocation.Z = InitialLocation.Z + GeometryData.Amplitude * FMath::Sin(GeometryData.Frequency * time);
-				SetActorLocation(CurrentLocation);
-			}
-			case EMovementType::Static: break;
-			default: break;
+			FVector CurrentLocation = GetActorLocation();
+			float time = GetWorld()->GetTimeSeconds();
+			CurrentLocation.Z = InitialLocation.Z + GeometryData.Amplitude * FMath::Sin(GeometryData.Frequency * time);
+			SetActorLocation(CurrentLocation);
 		}
+		case EMovementType::Static: break;
+		default: break;
+	}
+}
+
+void ABaseGeometryActor::SetColor()
+{
+	UMaterialInstanceDynamic* DynMaterial = BaseMesh->CreateAndSetMaterialInstanceDynamic(0);
+	if (DynMaterial)
+	{
+		DynMaterial->SetVectorParameterValue("Color", GeometryData.Color);
+	}
 }
